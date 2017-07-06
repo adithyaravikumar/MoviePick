@@ -23,14 +23,14 @@ class DetailViewController: UIViewController {
     @IBOutlet var type: UILabel!
     @IBOutlet var imageview: UIImageView!
     
-    var mediaInfo:NSMutableDictionary?
+    var mediaInfo:[String:Any]?
     var mediaObject:NSManagedObject?
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        self.navigationController?.navigationBar.tintColor = UIColor.whiteColor()
+        navigationController?.navigationBar.tintColor = UIColor.white
         plot.sizeToFit()
         
         if mediaInfo != nil {
@@ -43,9 +43,9 @@ class DetailViewController: UIViewController {
         }
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        NSNotificationCenter.defaultCenter().postNotification(NSNotification(name: GlobalConstants.ReloadHomeScreenCollectionView, object: nil))
+        NotificationCenter.default.post(Notification(name: Notification.Name(rawValue: GlobalConstants.ReloadHomeScreenCollectionView), object: nil))
     }
     
     override func didReceiveMemoryWarning() {
@@ -56,49 +56,54 @@ class DetailViewController: UIViewController {
     
     //MARK: Get data from Dictionary
     
-    func populateDataFromDictionary(media: NSMutableDictionary?) {
-        if let data = media {
-            filmTitle.text = data.valueForKey("Title") as? String
-            releaseYear.text = data.valueForKey("Year") as? String
-            imdbRating.text = data.valueForKey("imdbRating") as? String
-            ageRating.text = data.valueForKey("Rated") as? String
-            language.text = data.valueForKey("Language") as? String
-            direction.text = data.valueForKey("Director") as? String
-            cast.text = data.valueForKey("Actors") as? String
-            plot.text = data.valueForKey("Plot") as? String
-            type.text = data.valueForKey("Type") as? String
-            
-            //Get the image
-            var urlString:String? = data.valueForKey("Poster") as? String
-            
-            if urlString != "N/A" {
-                ImageLoader.sharedLoader.imageForUrl(urlString!, completionHandler:{(image: UIImage?, url: String) in
-                    self.imageview.image = image
-                })
-            }
+    func populateDataFromDictionary(_ media: [String:Any]?) {
+        
+        guard let data = media else {
+            return
+        }
+        
+        //Get the info required for display
+        filmTitle.text = data["Title"] as? String
+        releaseYear.text = data["Year"] as? String
+        imdbRating.text = data["imdbRating"] as? String
+        ageRating.text = data["Rated"] as? String
+        language.text = data["Language"] as? String
+        direction.text = data["Director"] as? String
+        cast.text = data["Actors"] as? String
+        plot.text = data["Plot"] as? String
+        type.text = data["Type"] as? String
+        let urlString = data["Poster"] as? String
+        
+        if urlString != "N/A" {
+            weak var weakSelf = self
+            ImageLoader.sharedLoader.imageForUrl(urlString!, completionHandler:{(image: UIImage?, url: String) in
+                weakSelf?.imageview.image = image
+            })
         }
     }
     
-    func populateDataFromManagedObject(object: NSManagedObject?) {
-        if let data = object {
-            filmTitle.text = data.valueForKey("title") as? String
-            releaseYear.text = data.valueForKey("year") as? String
-            imdbRating.text = data.valueForKey("imdbRating") as? String
-            ageRating.text = data.valueForKey("rated") as? String
-            language.text = data.valueForKey("language") as? String
-            direction.text = data.valueForKey("director") as? String
-            cast.text = data.valueForKey("cast") as? String
-            plot.text = data.valueForKey("plot") as? String
-            type.text = data.valueForKey("type") as? String
-            
-            //Get the image
-            var urlString:String? = data.valueForKey("imageUrl") as? String
-            
-            if urlString != "N/A" {
-                ImageLoader.sharedLoader.imageForUrl(urlString!, completionHandler:{(image: UIImage?, url: String) in
-                    self.imageview.image = image
-                })
-            }
+    func populateDataFromManagedObject(_ object: NSManagedObject?) {
+        guard let data = object else {
+            return
+        }
+        filmTitle.text = data.value(forKey: "title") as? String
+        releaseYear.text = data.value(forKey: "year") as? String
+        imdbRating.text = data.value(forKey: "imdbRating") as? String
+        ageRating.text = data.value(forKey: "rated") as? String
+        language.text = data.value(forKey: "language") as? String
+        direction.text = data.value(forKey: "director") as? String
+        cast.text = data.value(forKey: "cast") as? String
+        plot.text = data.value(forKey: "plot") as? String
+        type.text = data.value(forKey: "type") as? String
+        
+        //Get the image
+        let urlString = data.value(forKey: "imageUrl") as? String
+        
+        if urlString != "N/A" {
+            weak var weakSelf = self
+            ImageLoader.sharedLoader.imageForUrl(urlString!, completionHandler:{(image: UIImage?, url: String) in
+                weakSelf?.imageview.image = image
+            })
         }
     }
 }

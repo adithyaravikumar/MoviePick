@@ -30,10 +30,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     var mediaObjects = [NSManagedObject]()
     var searchResult:NSMutableArray = NSMutableArray()
     var searchBar:UISearchBar = UISearchBar()
-    let reachability = Reachability.reachabilityForInternetConnection()
     
     //Constants
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    let reachability = Reachability(hostname: GlobalConstants.OMDBServerURL)
     
     //Refresh control
     var refreshControl:UIRefreshControl = UIRefreshControl()
@@ -41,13 +41,14 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.navigationController?.navigationBarHidden = false
-        self.navigationController?.setViewControllers([self], animated: false)
-        self.navigationController?.navigationItem.setHidesBackButton(true, animated: false)
+        navigationController?.isNavigationBarHidden = false
+        navigationController?.setViewControllers([self], animated: false)
+        navigationController?.navigationItem.setHidesBackButton(true, animated: false)
         
         //Fetch Data from cache
-        fetchData(mediaTypeForSelectedSegmentIndex(searchTypeSegmentedControl.titleForSegmentAtIndex(searchTypeSegmentedControl.selectedSegmentIndex)!), completion: { (status) -> () in
-            self.mediaDisplayCollectionView.reloadData()
+        weak var weakSelf = self
+        fetchData(mediaTypeForSelectedSegmentIndex(searchTypeSegmentedControl.titleForSegment(at: searchTypeSegmentedControl.selectedSegmentIndex)!), completion: { (status) -> () in
+            weakSelf?.mediaDisplayCollectionView.reloadData()
         })
         
         //Setup UI
@@ -55,18 +56,19 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         setupMediaDisplay()
         setupSearchResultTableView()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: Selector("refresh"), name: GlobalConstants.ReloadHomeScreenCollectionView, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.refresh), name: NSNotification.Name(rawValue: GlobalConstants.ReloadHomeScreenCollectionView), object: nil)
         
-        refreshControl.addTarget(self, action: Selector("refresh"), forControlEvents: UIControlEvents.ValueChanged)
-        self.mediaDisplayCollectionView.addSubview(refreshControl)
+        refreshControl.addTarget(self, action: #selector(ViewController.refresh), for: UIControlEvents.valueChanged)
+        mediaDisplayCollectionView.addSubview(refreshControl)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        UIView.animateWithDuration(0.7, delay: 0.0, usingSpringWithDamping: 0.4, initialSpringVelocity: 0.6, options: UIViewAnimationOptions.AllowUserInteraction, animations: { () -> Void in
-            self.deleteButtonBottomConstraint.constant = 8.0
-            self.view.layoutIfNeeded()
+        weak var weakSelf = self
+        UIView.animate(withDuration: 0.7, delay: 0.0, usingSpringWithDamping: 0.4, initialSpringVelocity: 0.6, options: UIViewAnimationOptions.allowUserInteraction, animations: { () -> Void in
+            weakSelf?.deleteButtonBottomConstraint.constant = 8.0
+            weakSelf?.view.layoutIfNeeded()
         }) { (completed) -> Void in
         }
     }
@@ -79,36 +81,35 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     //MARK: UITableViewDataSource
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return searchResult.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        var cell:SearchDisplayTableViewCell = tableView.dequeueReusableCellWithIdentifier(GlobalConstants.SearchResultCell, forIndexPath: indexPath) as! SearchDisplayTableViewCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell:SearchDisplayTableViewCell = tableView.dequeueReusableCell(withIdentifier: GlobalConstants.SearchResultCell, for: indexPath) as! SearchDisplayTableViewCell
         
         //Populate the title and director name
-        if searchResult.count > 0 {
-            cell.mediaInfo = searchResult[indexPath.item] as? NSMutableDictionary
-            cell.textLabel?.text = searchResult[indexPath.item].valueForKey("Title") as? String
-            cell.detailTextLabel?.text = searchResult[indexPath.item].valueForKey("Director") as? String
-            
-            //Check if the movie has a poster
-            var urlString:String = searchResult[indexPath.item].valueForKey("Poster") as! String
-            cell.imageUrlString = urlString
-            
-            if urlString != "N/A" {
-                ImageLoader.sharedLoader.imageForUrl(urlString, completionHandler:{(image: UIImage?, url: String) in
-                    if let cellToUpdate:SearchDisplayTableViewCell = tableView.cellForRowAtIndexPath(indexPath) as? SearchDisplayTableViewCell {
-                        if cellToUpdate.imageUrlString == urlString {
-                            cellToUpdate.imageView?.image = image
-                            self.searchResultTableView.reloadData()
-                        }
+        cell.mediaInfo = searchResult[indexPath.item] as? [String : Any]
+        cell.textLabel?.text = (searchResult[indexPath.item] as AnyObject).value(forKey: "Title") as? String
+        cell.detailTextLabel?.text = (searchResult[indexPath.item] as AnyObject).value(forKey: "Director") as? String
+        
+        //Check if the movie has a poster
+        let urlString:String = (searchResult[indexPath.item] as AnyObject).value(forKey: "Poster") as! String
+        cell.imageUrlString = urlString
+        
+        if urlString != "N/A" {
+            weak var weakSelf = self
+            ImageLoader.sharedLoader.imageForUrl(urlString, completionHandler:{(image: UIImage?, url: String) in
+                if let cellToUpdate:SearchDisplayTableViewCell = tableView.cellForRow(at: indexPath) as? SearchDisplayTableViewCell {
+                    if cellToUpdate.imageUrlString == urlString {
+                        cellToUpdate.imageView?.image = image
+                        weakSelf?.searchResultTableView.reloadData()
                     }
-                })
-            }
-            else {
-                cell.imageView?.image = nil
-            }
+                }
+            })
+        }
+        else {
+            cell.imageView?.image = nil
         }
         return cell
     }
@@ -116,40 +117,39 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     //MARK: UITableViewDelegate
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        var cell:SearchDisplayTableViewCell = tableView.cellForRowAtIndexPath(indexPath) as! SearchDisplayTableViewCell
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let cell:SearchDisplayTableViewCell = tableView.cellForRow(at: indexPath) as! SearchDisplayTableViewCell
+        
+        weak var weakSelf = self
         saveData(cell.mediaInfo, completion: { (status) -> () in
-            println("Data has been saved. Now go to details screen")
-            var storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-            var controller:DetailViewController = storyboard.instantiateViewControllerWithIdentifier("DetailViewController") as! DetailViewController
+            print("Data has been saved. Now go to details screen")
+            let controller:DetailViewController = storyboard!.instantiateViewController(withIdentifier: "DetailViewController") as! DetailViewController
             controller.mediaInfo = cell.mediaInfo
-            
-            self.cleanupScreen()
-            
-            self.navigationController?.pushViewController(controller, animated: true)
+            weakSelf?.cleanupScreen()
+            weakSelf?.navigationController?.pushViewController(controller, animated: true)
         })
     }
     
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 110.0
     }
     
     
     //MARK: UICollectionViewDataSource
     
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return mediaObjects.count
     }
     
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        var collectionViewCell:MediaDisplayCollectionViewCell = collectionView.dequeueReusableCellWithReuseIdentifier(GlobalConstants.MovieCollectionViewCell, forIndexPath: indexPath) as! MediaDisplayCollectionViewCell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let collectionViewCell:MediaDisplayCollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: GlobalConstants.MovieCollectionViewCell, for: indexPath) as! MediaDisplayCollectionViewCell
         
         let mediaItem = mediaObjects[indexPath.item]
         
-        var title: String = mediaItem.valueForKey("title") as! String
-        var director: String = mediaItem.valueForKey("director") as! String
-        var rating: String = mediaItem.valueForKey("rated") as! String
-        var year:String = mediaItem.valueForKey("year") as! String
+        let title: String = mediaItem.value(forKey: "title") as! String
+        let director: String = mediaItem.value(forKey: "director") as! String
+        let rating: String = mediaItem.value(forKey: "rated") as! String
+        let year:String = mediaItem.value(forKey: "year") as! String
         
         collectionViewCell.title.text = title
         collectionViewCell.director.text = "Directed by \(director)"
@@ -158,11 +158,11 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         collectionViewCell.mediaInfo = mediaItem
         
         //Check if the movie has a poster
-        var urlString:String = mediaItem.valueForKey("imageUrl") as! String
+        let urlString:String = mediaItem.value(forKey: "imageUrl") as! String
         
         if urlString != "N/A" {
             ImageLoader.sharedLoader.imageForUrl(urlString, completionHandler:{(image: UIImage?, url: String) in
-                if let cellToUpdate:MediaDisplayCollectionViewCell = collectionView.cellForItemAtIndexPath(indexPath) as? MediaDisplayCollectionViewCell {
+                if let cellToUpdate:MediaDisplayCollectionViewCell = collectionView.cellForItem(at: indexPath) as? MediaDisplayCollectionViewCell {
                     cellToUpdate.imageView.image = image
                 }
             })
@@ -174,53 +174,51 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         return collectionViewCell
     }
     
-    func collectionView(collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, atIndexPath indexPath: NSIndexPath) -> UICollectionReusableView {
-        var headerView:UICollectionReusableView = collectionView.dequeueReusableSupplementaryViewOfKind(UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", forIndexPath: indexPath) as! UICollectionReusableView
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let headerView:UICollectionReusableView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "headerView", for: indexPath) 
         return headerView
     }
     
     
     //MARK: UICollectionViewDelegate
     
-    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        var cell:MediaDisplayCollectionViewCell = collectionView.cellForItemAtIndexPath(indexPath) as! MediaDisplayCollectionViewCell
-        var storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        var controller:DetailViewController = storyboard.instantiateViewControllerWithIdentifier("DetailViewController") as! DetailViewController
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let cell:MediaDisplayCollectionViewCell = collectionView.cellForItem(at: indexPath) as! MediaDisplayCollectionViewCell
+        let controller:DetailViewController = storyboard!.instantiateViewController(withIdentifier: "DetailViewController") as! DetailViewController
         controller.mediaObject = cell.mediaInfo
-        self.cleanupScreen()
-        
-        self.navigationController?.pushViewController(controller, animated: true)
+        cleanupScreen()
+        navigationController?.pushViewController(controller, animated: true)
     }
     
     
     //MARK: UICollectionViewDelegateFlowLayout
     
-    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        return CGSizeMake(self.view.frame.size.width * 0.95, 116)
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: view.frame.size.width * 0.95, height: 116)
     }
     
     
     //MARK: UISearchBarDelegate
     
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
         searchBar.text = ""
         displayTableView(false)
     }
     
-    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
-        searchForMedia(searchBar.text, type: mediaTypeForSelectedSegmentIndex(searchTypeSegmentedControl.titleForSegmentAtIndex(searchTypeSegmentedControl.selectedSegmentIndex)!), year:yearTextField.text)
+        searchForMedia(searchBar.text!, type: mediaTypeForSelectedSegmentIndex(searchTypeSegmentedControl.titleForSegment(at: searchTypeSegmentedControl.selectedSegmentIndex)!), year:yearTextField.text!)
     }
     
-    func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         displayTableView(true)
     }
     
     
     //MARK: Helpers
     
-    func mediaTypeForSelectedSegmentIndex(selectedSegment:String) ->String {
+    func mediaTypeForSelectedSegmentIndex(_ selectedSegment:String) ->String {
         var returnVal = ""
         
         switch selectedSegment {
@@ -232,47 +230,58 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         return returnVal
     }
     
-    func searchForMedia(searchString:String, type:String, year:String) {
-        if reachability.isReachable() {
-            searchResult.removeAllObjects()
-            NetworkHelper.sharedInstance.searchMedia(searchString, type: type, year: nil) { (media) -> () in
-                if let mediaData = media {
-                    var status:String = media?.valueForKey("Response") as! String
-                    if status == "True" {
-                        if self.searchResult.count == 0 {
-                            self.searchResult.addObject(media!)
-                        }
-                        self.searchResultTableView.reloadData()
+    func searchForMedia(_ searchString:String, type:String, year:String) {
+        
+        guard reachability != nil && (reachability?.isReachable)! else {
+            let alertView:UIAlertView = UIAlertView(title: "No network", message: "Please check your internet connection", delegate: nil, cancelButtonTitle: "Okay")
+            alertView.show()
+            return
+        }
+        
+        searchResult.removeAllObjects()
+        weak var weakSelf = self
+        NetworkHelper.sharedInstance.searchMedia(searchString, type: type, year: nil) { (media) -> () in
+            
+            DispatchQueue.main.async {
+                guard let mediaData = media else {
+                    return
+                }
+                
+                guard let status = mediaData["Response"] as? String else {
+                    return
+                }
+                
+                if status == "True" {
+                    if weakSelf?.searchResult.count == 0 {
+                        weakSelf?.searchResult.add(media!)
                     }
-                    else {
-                        self.cleanupScreen()
-                        var alertView:UIAlertView = UIAlertView(title: "Oops", message: "It seems like we can't find that title", delegate: nil, cancelButtonTitle: "Okay")
-                        alertView.show()
-                    }
+                    weakSelf?.searchResultTableView.reloadData()
+                }
+                else {
+                    weakSelf?.cleanupScreen()
+                    let alertView:UIAlertView = UIAlertView(title: "Oops", message: "It seems like we can't find that title", delegate: nil, cancelButtonTitle: "Okay")
+                    alertView.show()
                 }
             }
         }
-        else {
-            var alertView:UIAlertView = UIAlertView(title: "No network", message: "Please check your internet connection", delegate: nil, cancelButtonTitle: "Okay")
-            alertView.show()
-        }
     }
     
-    func displayTableView(display:Bool) {
+    func displayTableView(_ display:Bool) {
+        weak var weakSelf = self
         if display {
-            UIView.animateWithDuration(0.6, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.7, options: UIViewAnimationOptions.AllowUserInteraction, animations: { () -> Void in
-                self.searchTableViewHeightConstraint.constant = 120.0
-                self.view.layoutIfNeeded()
+            UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.7, options: UIViewAnimationOptions.allowUserInteraction, animations: { () -> Void in
+                weakSelf?.searchTableViewHeightConstraint.constant = 120.0
+                weakSelf?.view.layoutIfNeeded()
                 }, completion: { (completed) -> Void in
             })
         }
         else {
-            UIView.animateWithDuration(0.6, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.7, options: UIViewAnimationOptions.AllowUserInteraction, animations: { () -> Void in
-                self.searchTableViewHeightConstraint.constant = 0.0
-                self.view.layoutIfNeeded()
+            UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.7, options: UIViewAnimationOptions.allowUserInteraction, animations: { () -> Void in
+                weakSelf?.searchTableViewHeightConstraint.constant = 0.0
+                weakSelf?.view.layoutIfNeeded()
                 }, completion: { (completed) -> Void in
                     if completed {
-                        self.resetSearchResultTableView()
+                        weakSelf?.resetSearchResultTableView()
                     }
             })
         }
@@ -280,8 +289,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     func setupSearchBar() {
         searchBar.showsCancelButton = true
-        searchBar.tintColor = UIColor.whiteColor()
-        self.navigationItem.titleView = searchBar
+        searchBar.tintColor = UIColor.white
+        navigationItem.titleView = searchBar
         searchBar.delegate = self
     }
     
@@ -291,7 +300,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
     
     func setupSearchResultTableView() {
-        searchResultTableView.tableFooterView = UIView(frame: CGRectZero)
+        searchResultTableView.tableFooterView = UIView(frame: CGRect.zero)
         searchResultTableView.dataSource = self
         searchResultTableView.delegate = self
     }
@@ -302,145 +311,158 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }
     
     func cleanupScreen() {
-        self.searchBar.resignFirstResponder()
-        self.yearTextField.resignFirstResponder()
-        self.resetSearchResultTableView()
-        self.displayTableView(false)
+        searchBar.resignFirstResponder()
+        yearTextField.resignFirstResponder()
+        resetSearchResultTableView()
+        displayTableView(false)
     }
     
     
     //MARK: Core Data
     
-    func fetchData(type: String, completion:(status:Bool) -> ()) {
+    func fetchData(_ type: String, completion:(_ status:Bool) -> ()) {
         let managedContext = appDelegate.managedObjectContext!
-        let fetchRequest = NSFetchRequest(entityName:"Media")
-        var predicate:NSPredicate = NSPredicate(format: "type = %@", type)
+        
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"Media")
+        let predicate:NSPredicate = NSPredicate(format: "type = %@", type)
         fetchRequest.predicate = predicate
         
-        var error: NSError?
-        let fetchedResults = managedContext.executeFetchRequest(fetchRequest, error: &error) as? [NSManagedObject]
-        
-        if let results = fetchedResults {
-            mediaObjects = results
-            completion(status: true)
-        }
-        else {
-            println("Could not fetch \(error), \(error!.userInfo)")
-            completion(status: false)
+        do {
+            let fetchedResults = try managedContext.fetch(fetchRequest) as! [NSManagedObject]
+            mediaObjects = fetchedResults
+            completion(true)
+            
+        } catch {
+            print(error.localizedDescription)
+            completion(false)
         }
     }
     
-    func saveData(data: NSMutableDictionary?, completion:(status:Bool) -> ()) {
+    func saveData(_ data: [String:Any]?, completion:(_ status:Bool) -> ()) {
         if data != nil {
             
-            var managedContext = appDelegate.managedObjectContext!
-            var entity =  NSEntityDescription.entityForName("Media", inManagedObjectContext:managedContext)
-            let media = NSManagedObject(entity: entity!, insertIntoManagedObjectContext:managedContext)
+            let managedContext = appDelegate.managedObjectContext!
+            let entity =  NSEntityDescription.entity(forEntityName: "Media", in:managedContext)
+            let media = NSManagedObject(entity: entity!, insertInto:managedContext)
             
             //First check if the data already exists
-            let fetchRequest = NSFetchRequest(entityName:"Media")
-            var predicate:NSPredicate = NSPredicate(format: "title = %@", data?.valueForKey("Title") as! String)
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"Media")
+            let predicate:NSPredicate = NSPredicate(format: "title = %@", data!["Title"] as! String)
             fetchRequest.predicate = predicate
             
-            var fetchError: NSError?
-            let fetchedResults = managedContext.executeFetchRequest(fetchRequest, error: &fetchError) as? [NSManagedObject]
-            
-            if fetchedResults?.count > 0 {
-                completion(status: true)
-            }
-            else {
-                media.setValue(data?.valueForKey("Title"), forKey: "title")
-                media.setValue(data?.valueForKey("Actors"), forKey: "cast")
-                media.setValue(data?.valueForKey("Country"), forKey: "country")
-                media.setValue(data?.valueForKey("Director"), forKey: "director")
-                media.setValue(data?.valueForKey("Genre"), forKey: "genre")
-                media.setValue(data?.valueForKey("Poster"), forKey: "imageUrl")
-                media.setValue(data?.valueForKey("Language"), forKey: "language")
-                media.setValue(data?.valueForKey("Plot"), forKey: "plot")
-                media.setValue(data?.valueForKey("Rated"), forKey: "rated")
-                media.setValue(data?.valueForKey("Type"), forKey: "type")
-                media.setValue(data?.valueForKey("Year"), forKey: "year")
-                media.setValue(data?.valueForKey("imdbRating"), forKey: "imdbRating")
+            do {
+                let fetchedResults = try managedContext.fetch(fetchRequest) as! [NSManagedObject]
                 
-                var error: NSError?
-                if managedContext.save(&error) {
-                    mediaObjects.append(media)
-                    completion(status: true)
+                if fetchedResults.count > 0 {
+                    completion(true)
+                } else {
+                    media.setValue(data!["Title"], forKey: "title")
+                    media.setValue(data!["Actors"], forKey: "cast")
+                    media.setValue(data!["Country"], forKey: "country")
+                    media.setValue(data!["Director"], forKey: "director")
+                    media.setValue(data!["Genre"], forKey: "genre")
+                    media.setValue(data!["Poster"], forKey: "imageUrl")
+                    media.setValue(data!["Language"], forKey: "language")
+                    media.setValue(data!["Plot"], forKey: "plot")
+                    media.setValue(data!["Rated"], forKey: "rated")
+                    media.setValue(data!["Type"], forKey: "type")
+                    media.setValue(data!["Year"], forKey: "year")
+                    media.setValue(data!["imdbRating"], forKey: "imdbRating")
+                    
+                    do {
+                        try managedContext.save()
+                        mediaObjects.append(media)
+                        completion(true)
+                        
+                    } catch {
+                        print(error.localizedDescription)
+                        completion(false)
+                    }
+                    
                 }
-                else {
-                    println("Could not save \(error), \(error?.userInfo)")
-                    completion(status: false)
-                }
+                
+            } catch {
+                print(error.localizedDescription)
+                completion(false)
             }
         }
     }
     
     func deleteData() {
-        var managedContext = appDelegate.managedObjectContext!
-        let fetchRequest = NSFetchRequest(entityName:"Media")
-        var fetchError: NSError?
-        let fetchedResults = managedContext.executeFetchRequest(fetchRequest, error: &fetchError) as? [NSManagedObject]
-        if let items = fetchedResults {
-            if items.count > 0 {
-                let count = items.count - 1
-                for i in 0...count {
-                    managedContext.deleteObject(items[i])
-                }
-                var error: NSError?
-                managedContext.save(&error)
-                mediaObjects.removeAll(keepCapacity: true)
-                mediaDisplayCollectionView.reloadData()
+        let managedContext = appDelegate.managedObjectContext!
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName:"Media")
+        
+        do {
+            let fetchedResults = try managedContext.fetch(fetchRequest) as! [NSManagedObject]
+            
+            for item in fetchedResults {
+                managedContext.delete(item)
             }
+            
+            do {
+                try managedContext.save()
+                mediaObjects.removeAll(keepingCapacity: true)
+                mediaDisplayCollectionView.reloadData()
+                
+            } catch {
+                print(error.localizedDescription)
+                return
+            }
+            
+        } catch {
+            print(error.localizedDescription)
+            return
         }
     }
     
     
     //MARK: Handlers
     
-    @IBAction func segmentValueChanged(sender: UISegmentedControl) {
-        if searchResultTableView.numberOfRowsInSection(0) > 0 {
+    @IBAction func segmentValueChanged(_ sender: UISegmentedControl) {
+        if searchResultTableView.numberOfRows(inSection: 0) > 0 {
             resetSearchResultTableView()
-            searchForMedia(searchBar.text, type: mediaTypeForSelectedSegmentIndex(sender.titleForSegmentAtIndex(sender.selectedSegmentIndex)!), year:yearTextField.text)
+            searchForMedia(searchBar.text!, type: mediaTypeForSelectedSegmentIndex(sender.titleForSegment(at: sender.selectedSegmentIndex)!), year:yearTextField.text!)
         }
-        fetchData(mediaTypeForSelectedSegmentIndex(sender.titleForSegmentAtIndex(sender.selectedSegmentIndex)!), completion: { (status) -> () in
-            self.mediaDisplayCollectionView.reloadData()
+        weak var weakSelf = self
+        fetchData(mediaTypeForSelectedSegmentIndex(sender.titleForSegment(at: sender.selectedSegmentIndex)!), completion: { (status) -> () in
+            weakSelf?.mediaDisplayCollectionView.reloadData()
         })
     }
     
     func refresh() {
         mediaDisplayCollectionView.reloadData()
-        var timer = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: Selector("stopRefreshing"), userInfo: nil, repeats: false)
+        let timer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ViewController.stopRefreshing), userInfo: nil, repeats: false)
+        timer.fire()
     }
     
     func stopRefreshing() {
         refreshControl.endRefreshing()
     }
     
-    @IBAction func handleTap(sender: AnyObject) {
-        if searchResultTableView.numberOfRowsInSection(0) == 0 {
+    @IBAction func handleTap(_ sender: AnyObject) {
+        if searchResultTableView.numberOfRows(inSection: 0) == 0 {
             cleanupScreen()
         }
         else {
-            self.searchBar.resignFirstResponder()
-            self.yearTextField.resignFirstResponder()
+            searchBar.resignFirstResponder()
+            yearTextField.resignFirstResponder()
         }
     }
     
-    @IBAction func handleDeleteButtonTap(sender: UIButton) {
+    @IBAction func handleDeleteButtonTap(_ sender: UIButton) {
         deleteData()
     }
     
-    @IBAction func handleMoreButtonTap(sender: UIButton) {
-        var rootViewPoint:CGPoint? = sender.superview?.convertPoint(sender.center, toView: self.mediaDisplayCollectionView)
-        var indexPath:NSIndexPath? = self.mediaDisplayCollectionView.indexPathForItemAtPoint(rootViewPoint!)
-        var cell: MediaDisplayCollectionViewCell = self.mediaDisplayCollectionView.cellForItemAtIndexPath(indexPath!) as! MediaDisplayCollectionViewCell
+    @IBAction func handleMoreButtonTap(_ sender: UIButton) {
+        let rootViewPoint:CGPoint? = sender.superview?.convert(sender.center, to: mediaDisplayCollectionView)
+        let indexPath:IndexPath? = mediaDisplayCollectionView.indexPathForItem(at: rootViewPoint!)
+        let cell: MediaDisplayCollectionViewCell = mediaDisplayCollectionView.cellForItem(at: indexPath!) as! MediaDisplayCollectionViewCell
         
-        var storyboard:UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-        var controller:DetailViewController = storyboard.instantiateViewControllerWithIdentifier("DetailViewController") as! DetailViewController
+        let controller:DetailViewController = storyboard!.instantiateViewController(withIdentifier: "DetailViewController") as! DetailViewController
         controller.mediaObject = cell.mediaInfo
-        self.cleanupScreen()
+        cleanupScreen()
         
-        self.navigationController?.pushViewController(controller, animated: true)
+        navigationController?.pushViewController(controller, animated: true)
         
     }
     

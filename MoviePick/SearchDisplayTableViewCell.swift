@@ -10,7 +10,7 @@ import UIKit
 
 class SearchDisplayTableViewCell: UITableViewCell {
     
-    var mediaInfo:NSMutableDictionary?
+    var mediaInfo:[String:Any]?
     var imageUrlString:String?
     
     override func awakeFromNib() {
@@ -18,7 +18,7 @@ class SearchDisplayTableViewCell: UITableViewCell {
         // Initialization code
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state

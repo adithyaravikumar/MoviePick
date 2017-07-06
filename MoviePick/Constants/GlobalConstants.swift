@@ -10,4 +10,5 @@ struct GlobalConstants {
     static let SearchResultCell = "searchResultCell"
     static let MovieCollectionViewCell = "movieCollectionViewCell"
     static let ReloadHomeScreenCollectionView = "reloadHomeScreenCollectionView"
+    static let OMDBServerURL = "http://www.omdbapi.com/"
 }
