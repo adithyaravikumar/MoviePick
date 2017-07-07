@@ -19,6 +19,7 @@ class NetworkHelper {
     let AcceptJSONValue = "application/json"
     let HttpMethodValuePost = "POST"
     let HttpMethodValueGet = "GET"
+    let ApiKey = "138acb09"
     let baseURL = URL(string: GlobalConstants.OMDBServerURL)
     
     //Remove restrictions
@@ -26,7 +27,7 @@ class NetworkHelper {
         
         let filmTitle = title.replacingOccurrences(of: " ", with: "+")
         
-        let path = year == nil ? String(format: "?apikey=138acb09&t=%@&plot=short&r=json&type=%@", filmTitle, type) : String(format: "?apikey=138acb09&t=%@&y=%ld&plot=short&r=json&type=%@", filmTitle, year!, type)
+        let path = year == nil ? String(format: "?apikey=%@&t=%@&plot=short&r=json&type=%@", ApiKey, filmTitle, type) : String(format: "?apikey=%@&t=%@&y=%ld&plot=short&r=json&type=%@", ApiKey, filmTitle, year!, type)
         
         guard let url = URL(string: path, relativeTo: baseURL) else {
             print("Error: cannot create URL")

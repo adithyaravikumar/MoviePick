@@ -70,10 +70,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         super.viewDidAppear(animated)
         
         weak var weakSelf = self
-        UIView.animate(withDuration: 0.7, delay: 0.0, usingSpringWithDamping: 0.4, initialSpringVelocity: 0.6, options: UIViewAnimationOptions.allowUserInteraction, animations: { () -> Void in
-            weakSelf?.deleteButtonBottomConstraint.constant = 8.0
-            weakSelf?.view.layoutIfNeeded()
-        }) { (completed) -> Void in
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+            UIView.animate(withDuration: 0.7, delay: 0.0, usingSpringWithDamping: 0.4, initialSpringVelocity: 0.6, options: UIViewAnimationOptions.allowUserInteraction, animations: { () -> Void in
+                weakSelf?.deleteButtonBottomConstraint.constant = 8.0
+                weakSelf?.view.layoutIfNeeded()
+            }) { (completed) -> Void in
+            }
         }
     }
     
