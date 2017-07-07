@@ -19,15 +19,16 @@ class NetworkHelper {
     let AcceptJSONValue = "application/json"
     let HttpMethodValuePost = "POST"
     let HttpMethodValueGet = "GET"
-    let ApiKey = "138acb09"
     let baseURL = URL(string: GlobalConstants.OMDBServerURL)
     
-    //Remove restrictions
+    //Get media info from OMDB Server
     func searchMedia(_ title:String, type:String, year:Int?, completion:@escaping (_ media:[String:Any]?) -> ()) {
         
         let filmTitle = title.replacingOccurrences(of: " ", with: "+")
         
-        let path = year == nil ? String(format: "?apikey=%@&t=%@&plot=short&r=json&type=%@", ApiKey, filmTitle, type) : String(format: "?apikey=%@&t=%@&y=%ld&plot=short&r=json&type=%@", ApiKey, filmTitle, year!, type)
+        let apiKey = Bundle.main.infoDictionary?[GlobalConstants.OMDBAPIKey] ?? ""
+        
+        let path = year == nil ? String(format: GlobalConstants.MediaQueryWithoutYear, apiKey as! CVarArg, filmTitle, type) : String(format: GlobalConstants.MediaQueryWithYear, apiKey as! CVarArg, filmTitle, year!, type)
         
         guard let url = URL(string: path, relativeTo: baseURL) else {
             print("Error: cannot create URL")

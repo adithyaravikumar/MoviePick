@@ -41,5 +41,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>OMDB API Key</key>
+	<string>138acb09</string>
 </dict>
 </plist>

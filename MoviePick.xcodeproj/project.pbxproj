@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		57062EF61F0FAC9C00274075 /* MainScreenViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57062EF51F0FAC9C00274075 /* MainScreenViewModel.swift */; };
 		5733919D1B877D4F003975EC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5733919C1B877D4F003975EC /* AppDelegate.swift */; };
 		573391A01B877D4F003975EC /* MoviePick.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5733919E1B877D4F003975EC /* MoviePick.xcdatamodeld */; };
 		573391A21B877D4F003975EC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573391A11B877D4F003975EC /* ViewController.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		57062EF51F0FAC9C00274075 /* MainScreenViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainScreenViewModel.swift; sourceTree = "<group>"; };
 		573391971B877D4F003975EC /* MoviePick.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoviePick.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5733919B1B877D4F003975EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5733919C1B877D4F003975EC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -55,6 +57,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		57062EF71F0FACAB00274075 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				57062EF51F0FAC9C00274075 /* MainScreenViewModel.swift */,
+			);
+			name = ViewModels;
+			sourceTree = "<group>";
+		};
 		5733918E1B877D4F003975EC = {
 			isa = PBXGroup;
 			children = (
@@ -75,6 +85,7 @@
 		573391991B877D4F003975EC /* MoviePick */ = {
 			isa = PBXGroup;
 			children = (
+				57062EF71F0FACAB00274075 /* ViewModels */,
 				573391CE1B8924F2003975EC /* Cells */,
 				573391C71B87F47D003975EC /* Constants */,
 				573391C21B87F1D1003975EC /* Helpers */,
@@ -228,6 +239,7 @@
 				573391A21B877D4F003975EC /* ViewController.swift in Sources */,
 				573391D41B8A384E003975EC /* ImageLoader.swift in Sources */,
 				5733919D1B877D4F003975EC /* AppDelegate.swift in Sources */,
+				57062EF61F0FAC9C00274075 /* MainScreenViewModel.swift in Sources */,
 				573391A01B877D4F003975EC /* MoviePick.xcdatamodeld in Sources */,
 				573391D21B893907003975EC /* SearchDisplayTableViewCell.swift in Sources */,
 				573391D01B89251D003975EC /* MediaDisplayCollectionViewCell.swift in Sources */,
