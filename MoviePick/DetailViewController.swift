@@ -13,8 +13,6 @@ class DetailViewController: UIViewController {
     
     //Outlets
     @IBOutlet var releaseYear: UILabel!
-    @IBOutlet var ageRating: UILabel!
-    @IBOutlet var language: UILabel!
     @IBOutlet var direction: UILabel!
     @IBOutlet var cast: UILabel!
     @IBOutlet var plot: UILabel!
@@ -22,6 +20,12 @@ class DetailViewController: UIViewController {
     
     var mediaInfo:[String:Any]?
     var mediaObject:NSManagedObject?
+    
+    //Constants
+    let directionPrefix = "Directed by %@"
+    let castPrefix = "Starring %@"
+    let releaseDatePrefix = "Year %@"
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,11 +65,9 @@ class DetailViewController: UIViewController {
         
         //Get the info required for display
         title = data["Title"] as? String
-        releaseYear.text = data["Year"] as? String
-        ageRating.text = data["Rated"] as? String
-        language.text = data["Language"] as? String
-        direction.text = data["Director"] as? String
-        cast.text = data["Actors"] as? String
+        releaseYear.text = String(format: releaseDatePrefix, data["Year"] as! String)
+        direction.text = String(format: directionPrefix, data["Director"] as! String)
+        cast.text = String(format: castPrefix, data["Actors"] as! String)
         plot.text = data["Plot"] as? String
         let urlString = data["Poster"] as? String
         
@@ -82,11 +84,9 @@ class DetailViewController: UIViewController {
             return
         }
         title = data.value(forKey: "title") as? String
-        releaseYear.text = data.value(forKey: "year") as? String
-        ageRating.text = data.value(forKey: "rated") as? String
-        language.text = data.value(forKey: "language") as? String
-        direction.text = data.value(forKey: "director") as? String
-        cast.text = data.value(forKey: "cast") as? String
+        releaseYear.text = String(format: releaseDatePrefix, data.value(forKey: "year") as! String)
+        direction.text = String(format: directionPrefix, data.value(forKey: "director") as! String)
+        cast.text = String(format: castPrefix, data.value(forKey: "cast") as! String)
         plot.text = data.value(forKey: "plot") as? String
         
         //Get the image
