@@ -14,6 +14,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     //Constraints for animation
     @IBOutlet var searchTableViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet var deleteButtonBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var clearHistoryButton: UIButton!
     
     //Media display
     @IBOutlet var mediaDisplayCollectionView: UICollectionView!
@@ -24,7 +25,6 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     //Segmented control to switch between Movies and TV
     @IBOutlet var searchTypeSegmentedControl: UISegmentedControl!
-    
     
     //Properties
     var mediaObjects = [NSManagedObject]()
@@ -41,9 +41,13 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //Nav bar setup
         navigationController?.isNavigationBarHidden = false
         navigationController?.setViewControllers([self], animated: false)
         navigationController?.navigationItem.setHidesBackButton(true, animated: false)
+        
+        //Adjust bottom button corner radius
+        clearHistoryButton.layer.cornerRadius = 10.0
         
         //Fetch Data from cache
         weak var weakSelf = self
@@ -452,19 +456,5 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     @IBAction func handleDeleteButtonTap(_ sender: UIButton) {
         deleteData()
     }
-    
-    @IBAction func handleMoreButtonTap(_ sender: UIButton) {
-        let rootViewPoint:CGPoint? = sender.superview?.convert(sender.center, to: mediaDisplayCollectionView)
-        let indexPath:IndexPath? = mediaDisplayCollectionView.indexPathForItem(at: rootViewPoint!)
-        let cell: MediaDisplayCollectionViewCell = mediaDisplayCollectionView.cellForItem(at: indexPath!) as! MediaDisplayCollectionViewCell
-        
-        let controller:DetailViewController = storyboard!.instantiateViewController(withIdentifier: "DetailViewController") as! DetailViewController
-        controller.mediaObject = cell.mediaInfo
-        cleanupScreen()
-        
-        navigationController?.pushViewController(controller, animated: true)
-        
-    }
-    
 }
 

@@ -12,15 +12,12 @@ import CoreData
 class DetailViewController: UIViewController {
     
     //Outlets
-    @IBOutlet var filmTitle: UILabel!
     @IBOutlet var releaseYear: UILabel!
-    @IBOutlet var imdbRating: UILabel!
     @IBOutlet var ageRating: UILabel!
     @IBOutlet var language: UILabel!
     @IBOutlet var direction: UILabel!
     @IBOutlet var cast: UILabel!
     @IBOutlet var plot: UILabel!
-    @IBOutlet var type: UILabel!
     @IBOutlet var imageview: UIImageView!
     
     var mediaInfo:[String:Any]?
@@ -63,15 +60,13 @@ class DetailViewController: UIViewController {
         }
         
         //Get the info required for display
-        filmTitle.text = data["Title"] as? String
+        title = data["Title"] as? String
         releaseYear.text = data["Year"] as? String
-        imdbRating.text = data["imdbRating"] as? String
         ageRating.text = data["Rated"] as? String
         language.text = data["Language"] as? String
         direction.text = data["Director"] as? String
         cast.text = data["Actors"] as? String
         plot.text = data["Plot"] as? String
-        type.text = data["Type"] as? String
         let urlString = data["Poster"] as? String
         
         if urlString != "N/A" {
@@ -86,15 +81,13 @@ class DetailViewController: UIViewController {
         guard let data = object else {
             return
         }
-        filmTitle.text = data.value(forKey: "title") as? String
+        title = data.value(forKey: "title") as? String
         releaseYear.text = data.value(forKey: "year") as? String
-        imdbRating.text = data.value(forKey: "imdbRating") as? String
         ageRating.text = data.value(forKey: "rated") as? String
         language.text = data.value(forKey: "language") as? String
         direction.text = data.value(forKey: "director") as? String
         cast.text = data.value(forKey: "cast") as? String
         plot.text = data.value(forKey: "plot") as? String
-        type.text = data.value(forKey: "type") as? String
         
         //Get the image
         let urlString = data.value(forKey: "imageUrl") as? String

@@ -13,7 +13,6 @@
 		573391A51B877D4F003975EC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 573391A31B877D4F003975EC /* Main.storyboard */; };
 		573391A71B877D4F003975EC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 573391A61B877D4F003975EC /* Images.xcassets */; };
 		573391AA1B877D4F003975EC /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 573391A81B877D4F003975EC /* LaunchScreen.xib */; };
-		573391B61B877D50003975EC /* MoviePickTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573391B51B877D50003975EC /* MoviePickTests.swift */; };
 		573391C11B87E7E7003975EC /* UIColorHexValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573391C01B87E7E7003975EC /* UIColorHexValue.swift */; };
 		573391C41B87F1D1003975EC /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573391C31B87F1D1003975EC /* Reachability.swift */; };
 		573391C91B87F495003975EC /* GlobalConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573391C81B87F495003975EC /* GlobalConstants.swift */; };
@@ -24,16 +23,6 @@
 		573391D81B8A64A7003975EC /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 573391D71B8A64A7003975EC /* DetailViewController.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		573391B01B877D50003975EC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5733918F1B877D4F003975EC /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 573391961B877D4F003975EC;
-			remoteInfo = MoviePick;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		573391971B877D4F003975EC /* MoviePick.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MoviePick.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5733919B1B877D4F003975EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -43,7 +32,6 @@
 		573391A41B877D4F003975EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		573391A61B877D4F003975EC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		573391A91B877D4F003975EC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		573391AF1B877D50003975EC /* MoviePickTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MoviePickTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		573391B41B877D50003975EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		573391B51B877D50003975EC /* MoviePickTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoviePickTests.swift; sourceTree = "<group>"; };
 		573391C01B87E7E7003975EC /* UIColorHexValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorHexValue.swift; sourceTree = "<group>"; };
@@ -58,13 +46,6 @@
 
 /* Begin PBXFrameworksBuildPhase section */
 		573391941B877D4F003975EC /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		573391AC1B877D50003975EC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -87,7 +68,6 @@
 			isa = PBXGroup;
 			children = (
 				573391971B877D4F003975EC /* MoviePick.app */,
-				573391AF1B877D50003975EC /* MoviePickTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -191,24 +171,6 @@
 			productReference = 573391971B877D4F003975EC /* MoviePick.app */;
 			productType = "com.apple.product-type.application";
 		};
-		573391AE1B877D50003975EC /* MoviePickTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 573391BC1B877D50003975EC /* Build configuration list for PBXNativeTarget "MoviePickTests" */;
-			buildPhases = (
-				573391AB1B877D50003975EC /* Sources */,
-				573391AC1B877D50003975EC /* Frameworks */,
-				573391AD1B877D50003975EC /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				573391B11B877D50003975EC /* PBXTargetDependency */,
-			);
-			name = MoviePickTests;
-			productName = MoviePickTests;
-			productReference = 573391AF1B877D50003975EC /* MoviePickTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -220,12 +182,8 @@
 				TargetAttributes = {
 					573391961B877D4F003975EC = {
 						CreatedOnToolsVersion = 6.4;
+						DevelopmentTeam = 7TN7AK56VL;
 						LastSwiftMigration = 0830;
-					};
-					573391AE1B877D50003975EC = {
-						CreatedOnToolsVersion = 6.4;
-						LastSwiftMigration = 0830;
-						TestTargetID = 573391961B877D4F003975EC;
 					};
 				};
 			};
@@ -243,7 +201,6 @@
 			projectRoot = "";
 			targets = (
 				573391961B877D4F003975EC /* MoviePick */,
-				573391AE1B877D50003975EC /* MoviePickTests */,
 			);
 		};
 /* End PBXProject section */
@@ -256,13 +213,6 @@
 				573391A51B877D4F003975EC /* Main.storyboard in Resources */,
 				573391AA1B877D4F003975EC /* LaunchScreen.xib in Resources */,
 				573391A71B877D4F003975EC /* Images.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		573391AD1B877D50003975EC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,23 +237,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		573391AB1B877D50003975EC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				573391B61B877D50003975EC /* MoviePickTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		573391B11B877D50003975EC /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 573391961B877D4F003975EC /* MoviePick */;
-			targetProxy = 573391B01B877D50003975EC /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		573391A31B877D4F003975EC /* Main.storyboard */ = {
@@ -416,6 +350,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7TN7AK56VL;
 				INFOPLIST_FILE = MoviePick/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Adithya.$(PRODUCT_NAME:rfc1034identifier)";
@@ -428,49 +363,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7TN7AK56VL;
 				INFOPLIST_FILE = MoviePick/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.Adithya.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
-			};
-			name = Release;
-		};
-		573391BD1B877D50003975EC /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = MoviePickTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.Adithya.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MoviePick.app/MoviePick";
-			};
-			name = Debug;
-		};
-		573391BE1B877D50003975EC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = MoviePickTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.Adithya.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MoviePick.app/MoviePick";
 			};
 			name = Release;
 		};
@@ -491,15 +389,6 @@
 			buildConfigurations = (
 				573391BA1B877D50003975EC /* Debug */,
 				573391BB1B877D50003975EC /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		573391BC1B877D50003975EC /* Build configuration list for PBXNativeTarget "MoviePickTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				573391BD1B877D50003975EC /* Debug */,
-				573391BE1B877D50003975EC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
